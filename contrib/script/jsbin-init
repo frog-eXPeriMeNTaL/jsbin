@@ -4,7 +4,7 @@
 # Provides: jsbin (via node)
 # Required-Start: $local_fs $remote_fs $network $named $syslog
 # Required-Stop: $local_fs $remote_fs $network $named $syslog
-# Default-Start:  3 4 5
+# Default-Start:  2 3 4 5
 # Default-Stop: 0 1 6
 # Short-Description: start, stop, get status from and restart jsbin
 # Description: Start, stop, get status from and restart jsbin
@@ -12,37 +12,31 @@
 
 # run update-rc.d to create the proper links to rc*.d directories
  
-# Set the variables for creating the /var/run directory
 APP=jsbin
-RUN_DIR=/var/run/jsbin
 USER=jsbin
-GROUP=jsbin
-RUN_DIR_PERMS=0775
+
 APP_HOME=/srv/node/jsbin
 
-if [ ! -d $RUN_DIR ]; then
-  mkdir $RUN_DIR || true
-  chown $USER:$GROUP $RUN_DIR || true
-  chmod $RUN_DIR_PERMS || true 
-fi
+export FOREVER_ROOT=/etc/forever
 
 case "$1" in 
 # Start command 
 start) 
 echo "Starting $APP" 
-/bin/su -m $USER -c "$APP_HOME/contrib/script/startup-shutdown.sh start 2&>1 /var/log/$APP/startuperr.txt"
+/bin/su -m $USER -c "$APP_HOME/contrib/script/startup-shutdown.sh start"
 ;;
 
 # Stop command 
 stop) 
 echo "Stopping $APP" 
-/bin/su -m $USER -c "$APP_HOME/contrib/script/startup-shutdown.sh stop 2&>1 /var/log/$APP/shutdownerr.txt"
+/bin/su -m $USER -c "$APP_HOME/contrib/script/startup-shutdown.sh stop"
 echo "$APP stopped successfully" 
 ;;
 
+# Status command
 status)
 echo "Getting status for $APP"
-/bin/su -m $USER -c "$APP_HOME/contrib/script/startup-shutdown.sh status 2&>1 /dev/null"
+/bin/su -m $USER -c "$APP_HOME/contrib/script/startup-shutdown.sh status"
 ;;
 
 # Restart command 

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -l
 
 # Set the variables for creating the /var/run directory
 RUN_DIR=/var/run/jsbin
@@ -24,7 +24,7 @@ if [[ $1 == start ]]; then
         #Check to see if jsbin is running
         JSBIN_ID=`forever list | grep jsbin | awk '{print $2}' | sed 's/[^0-9]//g'`
         if [[ -z $JSBIN_ID ]]; then
-                PORT=3000 forever start --minUptime $MIN_UPTIME --spinSleepTime $SPIN_SLEEP_TIME --sourceDir $SOURCE_DIR --workingDir $APP_HOME -a -l $FOREVER_LOG -o $JSBIN_LOG -e $JSBIN_ERROR --pidFile $JSBIN_PID -c node .
+                PORT=3000 forever start --minUptime $MIN_UPTIME --spinSleepTime $SPIN_SLEEP_TIME --sourceDir $SOURCE_DIR --workingDir $APP_HOME -a -o $JSBIN_LOG -e $JSBIN_ERROR -c node .
         else
                 echo "jsbin is already running, please stop before attempting to start"
                 forever list | grep $JSBIN_ID | grep jsbin
@@ -34,7 +34,11 @@ elif [[ $1 == stop ]]; then
         PATH=$NODE_BIN_DIR:$PATH
 
         JSBIN_ID=`forever list | grep jsbin | awk '{print $2}' | sed 's/[^0-9]//g'`
-        forever stop $JSBIN_ID
+        if [[ -z $JSBIN_ID ]]; then
+                echo "JSBIN isn't running"
+        else
+                forever stop $JSBIN_ID
+        fi
 elif [[ $1 == status ]]; then
         #Setup path for the node modules
         PATH=$NODE_BIN_DIR:$PATH
