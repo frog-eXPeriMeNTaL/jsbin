@@ -1,0 +1,62 @@
+#!/bin/sh
+
+### BEGIN INIT INFO
+# Provides: jsbin (via node)
+# Required-Start: $local_fs $remote_fs $network $named $syslog
+# Required-Stop: $local_fs $remote_fs $network $named $syslog
+# Default-Start:  3 4 5
+# Default-Stop: 0 1 6
+# Short-Description: start, stop, get status from and restart jsbin
+# Description: Start, stop, get status from and restart jsbin
+### END INIT INFO
+
+# run update-rc.d to create the proper links to rc*.d directories
+ 
+# Set the variables for creating the /var/run directory
+APP=jsbin
+RUN_DIR=/var/run/jsbin
+USER=jsbin
+GROUP=jsbin
+RUN_DIR_PERMS=0775
+APP_HOME=/srv/node/jsbin
+
+if [ ! -d $RUN_DIR ]; then
+  mkdir $RUN_DIR || true
+  chown $USER:$GROUP $RUN_DIR || true
+  chmod $RUN_DIR_PERMS || true 
+fi
+
+case "$1" in 
+# Start command 
+start) 
+echo "Starting $APP" 
+/bin/su -m $USER -c "$APP_HOME/contrib/script/startup-shutdown.sh start 2&>1 /var/log/$APP/startuperr.txt"
+;;
+
+# Stop command 
+stop) 
+echo "Stopping $APP" 
+/bin/su -m $USER -c "$APP_HOME/contrib/script/startup-shutdown.sh stop 2&>1 /var/log/$APP/shutdownerr.txt"
+echo "$APP stopped successfully" 
+;;
+
+status)
+echo "Getting status for $APP"
+/bin/su -m $USER -c "$APP_HOME/contrib/script/startup-shutdown.sh status 2&>1 /dev/null"
+;;
+
+# Restart command 
+restart) 
+$0 stop 
+sleep 10
+$0 start 
+;;
+ 
+*) 
+echo "Usage: /etc/init.d/$APP {start|restart|status|stop}" 
+exit 1 
+;;
+ 
+esac 
+
+exit 0
